@@ -1,3 +1,6 @@
+#ifndef __SERVER_PROTOCOL_MESSAGES_H__
+#define __SERVER_PROTOCOL_MESSAGES_H__
+
 #include <General/DataStructures.h>
 
 namespace ServerProtocol
@@ -20,7 +23,7 @@ namespace ServerProtocol
     static constexpr size_t MAX_PEERS_INFO_IN_MESSAGE = 8;
 
     // message structures
-// #pragma pack(push, 1)
+#pragma pack(push, 1)
     struct MessageHeader
     {
         MessageTypes message_type;
@@ -56,5 +59,7 @@ namespace ServerProtocol
 
     typedef MessageHeader ThanksMessage;
 
-// #pragma pack(pop)
+#pragma pack(pop)
 }
+
+#endif //__SERVER_PROTOCOL_MESSAGES_H__

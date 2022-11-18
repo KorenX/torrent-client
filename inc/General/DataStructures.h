@@ -1,3 +1,6 @@
+#ifndef __GENERAL_DATA_STRUCTURES_H__
+#define __GENERAL_DATA_STRUCTURES_H__
+
 #include <stdint.h>
 
 namespace DataSturtures
@@ -5,7 +8,7 @@ namespace DataSturtures
     static constexpr size_t MAX_FILE_NAME_LENGTH = 64;
     static constexpr size_t MAX_FILE_DESC_LENGTH = 64;
 
-// #pragma pack(push, 1)
+#pragma pack(push, 1)
     struct FileInfo
     {
         uint32_t file_id;
@@ -17,5 +20,7 @@ namespace DataSturtures
     {
         uint32_t peer_ip;
     };
-// #pragma pack(pop)
+#pragma pack(pop)
 }
+
+#endif //__GENERAL_DATA_STRUCTURES_H__
