@@ -38,6 +38,7 @@ namespace ServerProtocol
         uint32_t files_info_amount;
         uint32_t starting_index;
         DataStructures::FileInfo files_info[MAX_FILES_INFO_IN_MESSAGE];
+        static constexpr size_t MINIMAL_SIZE = sizeof(message_header) + sizeof(files_info_amount) + sizeof(starting_index) + sizeof(DataStructures::FileInfo);
     };
 
     struct AckMessage
