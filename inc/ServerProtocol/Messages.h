@@ -20,7 +20,8 @@ namespace ServerProtocol
     };
 
     static constexpr size_t MAX_FILES_INFO_IN_MESSAGE = 8;
-    static constexpr size_t MAX_PEERS_INFO_IN_MESSAGE = 8;
+    static constexpr size_t MAX_PEERS_INFO_IN_MESSAGE = 128;
+    static constexpr size_t MAX_PACKET_SIZE = 1248;
 
     // message structures
 #pragma pack(push, 1)
@@ -34,7 +35,9 @@ namespace ServerProtocol
     struct FilesChunkMessage
     {
         MessageHeader message_header;
-        DataSturtures::FileInfo files_info[MAX_FILES_INFO_IN_MESSAGE];
+        uint32_t files_info_amount;
+        uint32_t starting_index;
+        DataStructures::FileInfo files_info[MAX_FILES_INFO_IN_MESSAGE];
     };
 
     struct AckMessage
@@ -51,7 +54,9 @@ namespace ServerProtocol
     struct PeersChunkMessage
     {
         MessageHeader message_header;
-        DataSturtures::PeerInfo peers_info[MAX_PEERS_INFO_IN_MESSAGE];
+        uint32_t peers_info_amount;
+        uint32_t starting_index;
+        DataStructures::PeerInfo peers_info[MAX_PEERS_INFO_IN_MESSAGE];
     };
 
     typedef AckMessage PeersAckMessage;
@@ -59,7 +64,23 @@ namespace ServerProtocol
 
     typedef MessageHeader ThanksMessage;
 
+    struct MaxServerMessage
+    {
+        MessageHeader message_header;
+        uint8_t message_payload[MAX_PACKET_SIZE - sizeof(MessageHeader)];
+    };
+
 #pragma pack(pop)
+    static_assert(MAX_PACKET_SIZE >= sizeof(FilesListMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(FilesChunkMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(FilesAckMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(FilesFinishMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(PeersListMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(PeersChunkMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(PeersAckMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(PeersFinishMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(ThanksMessage), "Message needs to be smaller than the max packet size");
+    static_assert(MAX_PACKET_SIZE >= sizeof(MaxServerMessage), "Message needs to be smaller than the max packet size");
 }
 
 #endif //__SERVER_PROTOCOL_MESSAGES_H__

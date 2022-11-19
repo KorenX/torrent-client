@@ -1,3 +1,6 @@
+#ifndef __NETWORKS_UDP_SOCKET_H__
+#define __NETWORKS_UDP_SOCKET_H__
+
 #include <winsock2.h>
 #include <stdint.h>
 #include <Networks/Status.h>
@@ -22,3 +25,5 @@ namespace Networks
         sockaddr_in m_dest;
     };
 }
+
+#endif //__NETWORKS_UDP_SOCKET_H__

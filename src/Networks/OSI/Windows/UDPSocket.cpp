@@ -2,6 +2,13 @@
 
 Networks::Status Networks::UDPSocket::Init(const uint32_t dest_ip, const uint16_t dest_port)
 {
+	WSADATA wsa;
+
+    if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
+	{
+        return Networks::Status::SocketCreationFailed;
+	}
+
     m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (m_socket == SOCKET_ERROR)
     {

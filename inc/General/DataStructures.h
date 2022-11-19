@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-namespace DataSturtures
+namespace DataStructures
 {
     static constexpr size_t MAX_FILE_NAME_LENGTH = 64;
     static constexpr size_t MAX_FILE_DESC_LENGTH = 64;
