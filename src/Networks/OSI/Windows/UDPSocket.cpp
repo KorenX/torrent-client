@@ -17,8 +17,8 @@ Networks::Status Networks::UDPSocket::Init(const uint32_t dest_ip, const uint16_
 
     memset(&m_dest, 0, sizeof(m_dest));
     m_dest.sin_family = AF_INET;
-    m_dest.sin_addr.S_un.S_addr = dest_ip;
-    m_dest.sin_port = dest_port;
+    m_dest.sin_addr.S_un.S_addr = htonl(dest_ip);
+    m_dest.sin_port = htons(dest_port);
 
     m_init = true;
     return Networks::Status::Success;

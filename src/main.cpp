@@ -6,8 +6,8 @@
 int main(int argc, char* argv[])
 {
     Networks::UDPSocket sock;
-    uint32_t dest_ip = 0x00000000;
-    uint32_t dest_port = 9001;
+    uint32_t dest_ip = 0x7f000001;
+    uint16_t dest_port = 9001;
     Networks::Status result = sock.Init(dest_ip, dest_port);
     if (result != Networks::Status::Success)
     {
