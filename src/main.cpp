@@ -16,8 +16,22 @@ int main(int argc, char* argv[])
     }
 
     ServerProtocol::CommunicationManager com(sock);
-    bool final = com.PrintAvailableFiles();
-    printf(final ? "program finished successfully\n" : "program finished with failure\n");
+    if (!com.PrintAvailableFiles())
+    {
+        printf("File list failed\n");
+        return 1;
+    }
+    printf("Enter the file id you wish to download:\n");
+    DataStructures::FileInfo wanted_file = {};
+    scanf("%u", &wanted_file.file_id);
 
+    DataStructures::PeerInfo available_peer = {};
+    if (!com.GetPeerForFile(wanted_file, available_peer))
+    {
+        printf("File list failed\n");
+        return 1;
+    }
+
+    printf("gracefull exit");
     return 0;
 }

@@ -50,14 +50,19 @@ namespace ServerProtocol
     typedef AckMessage FilesAckMessage;
     typedef MessageHeader FilesFinishMessage;
 
-    typedef MessageHeader PeersListMessage;
-
+    struct PeersListMessage
+    {
+        MessageHeader message_header;
+        DataStructures::FileInfo wanted_file;
+    };
+    
     struct PeersChunkMessage
     {
         MessageHeader message_header;
         uint32_t peers_info_amount;
         uint32_t starting_index;
         DataStructures::PeerInfo peers_info[MAX_PEERS_INFO_IN_MESSAGE];
+        static constexpr size_t MINIMAL_SIZE = sizeof(message_header) + sizeof(peers_info_amount) + sizeof(starting_index) + sizeof(DataStructures::PeerInfo);
     };
 
     typedef AckMessage PeersAckMessage;

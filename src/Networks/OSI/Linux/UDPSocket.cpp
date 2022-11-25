@@ -4,11 +4,6 @@ namespace Networks
 {
     Status UDPSocket::Init(const uint32_t dest_ip, const uint16_t dest_port)
     {
-        // m_dest.ai_family = AF_INET;
-        // m_dest.ai_socktype = SOCK_DGRAM;
-        // m_dest.ai_protocol = IPPROTO_UDP;
-
-        // m_socket_fd = socket(m_dest.ai_family, m_dest.ai_socktype, m_dest.ai_protocol);
         m_socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if (m_socket_fd < 0)
         {

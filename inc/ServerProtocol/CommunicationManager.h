@@ -9,7 +9,11 @@ namespace ServerProtocol
     class CommunicationManager
     {
     public:
-        CommunicationManager(Networks::UDPSocket& server_socket) : m_server_socket(server_socket), m_current_fi_index(0) {}
+        CommunicationManager(Networks::UDPSocket& server_socket) :  m_server_socket(server_socket), 
+                                                                    m_current_fi_index(0),
+                                                                    m_current_pi_index(0),
+                                                                    m_peers_bunch({}),
+                                                                    m_peers_amount(0) {}
 
         bool PrintAvailableFiles(bool print_desc = false);
 
@@ -23,8 +27,19 @@ namespace ServerProtocol
 
         bool SendFilesAck();
 
+        bool SendPeersList(DataStructures::FileInfo& wanted_file);
+
+        bool GetPeersBunch();
+
+        bool HandlePeersChunk(PeersChunkMessage& peers_chunk);
+        
+        bool SendPeersAck();
+        
         Networks::UDPSocket& m_server_socket;
         uint32_t m_current_fi_index;
+        uint32_t m_current_pi_index;
+        DataStructures::PeerInfo m_peers_bunch[MAX_PEERS_INFO_IN_MESSAGE];
+        uint32_t m_peers_amount;
     };
 }
 
