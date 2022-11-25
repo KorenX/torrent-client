@@ -28,10 +28,10 @@ int main(int argc, char* argv[])
     DataStructures::PeerInfo available_peer = {};
     if (!com.GetPeerForFile(wanted_file, available_peer))
     {
-        printf("File list failed\n");
+        printf("Peer list failed\n");
         return 1;
     }
 
-    printf("gracefull exit");
+    printf("Available peer info: %x\n", available_peer.peer_ip);
     return 0;
 }

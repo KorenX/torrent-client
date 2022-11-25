@@ -173,9 +173,14 @@ namespace ServerProtocol
                 return false;
             }
         }
-        else if (recv_msg.message_header.message_type == MessageTypes::FILES_FIN)
+        else if (recv_msg.message_header.message_type == MessageTypes::PEERS_FIN)
         {
             return true;
+        }
+        else
+        {
+            printf("Got bad message type: %u\n", static_cast<uint32_t>(recv_msg.message_header.message_type));
+            return false;
         }
 
         return true;
@@ -208,7 +213,7 @@ namespace ServerProtocol
 
     bool CommunicationManager::SendPeersAck()
     {
-        PeersAckMessage ack_message;
+        PeersAckMessage ack_message = {};
         ack_message.message_header.message_type = MessageTypes::PEERS_ACK;
         ack_message.ack_index = m_current_pi_index;
 
