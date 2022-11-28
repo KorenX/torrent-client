@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ServerProtocol/CommunicationManager.h>
 #include <Networks/UDPSocket.h>
+#include <General/Log.h>
 
 int main(int argc, char* argv[])
 {
@@ -11,27 +12,27 @@ int main(int argc, char* argv[])
     Networks::Status result = sock.Init(dest_ip, dest_port);
     if (result != Networks::Status::Success)
     {
-        printf("socket init failed with code %u\n", static_cast<uint32_t>(result));
+        PRINT("socket init failed with code %u\n", static_cast<uint32_t>(result));
         return 1;
     }
 
     ServerProtocol::CommunicationManager com(sock);
     if (!com.PrintAvailableFiles())
     {
-        printf("File list failed\n");
+        PRINT("File list failed\n");
         return 1;
     }
-    printf("Enter the file id you wish to download:\n");
+    PRINT("Enter the file id you wish to download:\n");
     DataStructures::FileInfo wanted_file = {};
     scanf("%u", &wanted_file.file_id);
 
     DataStructures::PeerInfo available_peer = {};
     if (!com.GetPeerForFile(wanted_file, available_peer))
     {
-        printf("Peer list failed\n");
+        PRINT("Peer list failed\n");
         return 1;
     }
 
-    printf("Available peer info: %x\n", available_peer.peer_ip);
+    PRINT("Available peer info: %x\n", available_peer.peer_ip);
     return 0;
 }

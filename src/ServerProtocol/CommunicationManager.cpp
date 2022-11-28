@@ -1,6 +1,7 @@
 #include <ServerProtocol/CommunicationManager.h>
 #include <stdio.h>
 #include <string.h>
+#include <General/Log.h>
 
 namespace ServerProtocol
 {
@@ -16,36 +17,36 @@ namespace ServerProtocol
         Networks::Status recv_result = m_server_socket.Receive(&recv_msg, sizeof(recv_msg), recv_size);
         if (recv_result != Networks::Status::Success)
         {
-            printf("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
+            PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
             return false;
         }
 
-        printf("FILE ID\t\tFILE NAME");
-        print_desc ? printf("\tFILE DESC\n") : printf("\n");
+        PRINT("FILE ID\t\tFILE NAME");
+        print_desc ? PRINT("\tFILE DESC\n") : PRINT("\n");
         while (recv_msg.message_header.message_type == MessageTypes::FILES_CHUNK)
         {
             if (recv_size < FilesChunkMessage::MINIMAL_SIZE)
             {
-                printf("Tried to construct files chunk message with %lu bytes\n", recv_size);
+                PRINT("Tried to construct files chunk message with %lu bytes\n", recv_size);
                 return false;
             }
 
             bool success = HandleFilesChunk(reinterpret_cast<FilesChunkMessage&>(recv_msg), print_desc);
             if (!success)
             {
-                printf("Handle Files Chunk Failed\n");
+                PRINT("Handle Files Chunk Failed\n");
                 return false;
             }
 
             recv_result = m_server_socket.Receive(&recv_msg, sizeof(recv_msg), recv_size);
             if (recv_result != Networks::Status::Success)
             {
-                printf("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
+                PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
                 return false;
             }
         }
 
-        printf("-------------------------\n");
+        PRINT("-------------------------\n");
 
         return recv_msg.message_header.message_type == MessageTypes::FILES_FIN;
     }
@@ -66,9 +67,9 @@ namespace ServerProtocol
         }
         
 
-        memcpy(&o_peer, &m_peers_bunch[m_current_pi_index++], sizeof(DataStructures::PeerInfo));
+        memcpy(&o_peer, &m_peers_bunch[m_current_peer++], sizeof(DataStructures::PeerInfo));
 
-        if (m_current_pi_index >= m_peers_amount)
+        if (m_current_peer >= m_peers_amount)
         {
             return GetPeersBunch();
         }
@@ -84,7 +85,7 @@ namespace ServerProtocol
         Networks::Status result = m_server_socket.Send(&list_message, sizeof(list_message));
         if (result != Networks::Status::Success)
         {
-            printf("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_type), static_cast<uint32_t>(result));
+            PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_type), static_cast<uint32_t>(result));
             return false;
         }
 
@@ -100,15 +101,15 @@ namespace ServerProtocol
 
         if (files_chunk.files_info_amount > MAX_FILES_INFO_IN_MESSAGE)
         {
-            printf("got illegal value for files info amount %u\n", files_chunk.files_info_amount);
+            PRINT("got illegal value for files info amount %u\n", files_chunk.files_info_amount);
             return false;
         }
 
         for (size_t i = 0; i < files_chunk.files_info_amount; i++)
         {
             DataStructures::FileInfo& cur_file = files_chunk.files_info[i];
-            printf("%u\t\t%s\t", cur_file.file_id, cur_file.file_name);
-            print_desc ? printf("%s\n", cur_file.file_desc) : printf("\n");
+            PRINT("%u\t\t%s\t", cur_file.file_id, cur_file.file_name);
+            print_desc ? PRINT("%s\n", cur_file.file_desc) : PRINT("\n");
         }
 
         m_current_fi_index += files_chunk.files_info_amount;
@@ -124,7 +125,7 @@ namespace ServerProtocol
         Networks::Status result = m_server_socket.Send(&ack_message, sizeof(ack_message));
         if (result != Networks::Status::Success)
         {
-            printf("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
+            PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
             return false;
         }
 
@@ -140,7 +141,7 @@ namespace ServerProtocol
         Networks::Status result = m_server_socket.Send(&list_message, sizeof(list_message));
         if (result != Networks::Status::Success)
         {
-            printf("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_header.message_type), static_cast<uint32_t>(result));
+            PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_header.message_type), static_cast<uint32_t>(result));
             return false;
         }
 
@@ -154,7 +155,7 @@ namespace ServerProtocol
         Networks::Status recv_result = m_server_socket.Receive(&recv_msg, sizeof(recv_msg), recv_size);
         if (recv_result != Networks::Status::Success)
         {
-            printf("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
+            PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
             return false;
         }
 
@@ -162,14 +163,14 @@ namespace ServerProtocol
         {
             if (recv_size < PeersChunkMessage::MINIMAL_SIZE)
             {
-                printf("Tried to construct peers chunk message with %lu bytes\n", recv_size);
+                PRINT("Tried to construct peers chunk message with %lu bytes\n", recv_size);
                 return false;
             }
 
             bool success = HandlePeersChunk(reinterpret_cast<PeersChunkMessage&>(recv_msg));
             if (!success)
             {
-                printf("Handle Peers Chunk Failed\n");
+                PRINT("Handle Peers Chunk Failed\n");
                 return false;
             }
         }
@@ -179,7 +180,7 @@ namespace ServerProtocol
         }
         else
         {
-            printf("Got bad message type: %u\n", static_cast<uint32_t>(recv_msg.message_header.message_type));
+            PRINT("Got bad message type: %u\n", static_cast<uint32_t>(recv_msg.message_header.message_type));
             return false;
         }
 
@@ -200,13 +201,14 @@ namespace ServerProtocol
 
         if (peers_chunk.peers_info_amount > MAX_PEERS_INFO_IN_MESSAGE)
         {
-            printf("got illegal value for peers info amount %u\n", peers_chunk.peers_info_amount);
+            PRINT("got illegal value for peers info amount %u\n", peers_chunk.peers_info_amount);
             return false;
         }
 
         memcpy(m_peers_bunch, peers_chunk.peers_info, peers_chunk.peers_info_amount * sizeof(DataStructures::PeerInfo));
         m_peers_amount = peers_chunk.peers_info_amount;
         m_current_pi_index += peers_chunk.peers_info_amount;
+        m_current_peer = 0;
 
         return SendPeersAck();
     }
@@ -220,7 +222,7 @@ namespace ServerProtocol
         Networks::Status result = m_server_socket.Send(&ack_message, sizeof(ack_message));
         if (result != Networks::Status::Success)
         {
-            printf("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
+            PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
             return false;
         }
 

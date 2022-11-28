@@ -13,6 +13,7 @@ namespace ServerProtocol
                                                                     m_current_fi_index(0),
                                                                     m_current_pi_index(0),
                                                                     m_peers_bunch({}),
+                                                                    m_current_peer(0),
                                                                     m_peers_amount(0) {}
 
         bool PrintAvailableFiles(bool print_desc = false);
@@ -39,6 +40,7 @@ namespace ServerProtocol
         uint32_t m_current_fi_index;
         uint32_t m_current_pi_index;
         DataStructures::PeerInfo m_peers_bunch[MAX_PEERS_INFO_IN_MESSAGE];
+        uint32_t m_current_peer;
         uint32_t m_peers_amount;
     };
 }
