@@ -20,6 +20,7 @@ namespace DataStructures
     struct PeerInfo
     {
         uint32_t peer_ip;
+        uint16_t peer_port;
     };
 #pragma pack(pop)
 }

@@ -33,6 +33,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    PRINT("Available peer info: %x\n", available_peer.peer_ip);
+    PRINT("Available peer info: 0x%x:%d\n", available_peer.peer_ip, available_peer.peer_port);
     return 0;
 }

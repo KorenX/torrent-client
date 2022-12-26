@@ -20,7 +20,7 @@ namespace ServerProtocol
     };
 
     static constexpr size_t MAX_FILES_INFO_IN_MESSAGE = 8;
-    static constexpr size_t MAX_PEERS_INFO_IN_MESSAGE = 128;
+    static constexpr size_t MAX_PEERS_INFO_IN_MESSAGE = 64;
     static constexpr size_t MAX_PACKET_SIZE = 1248;
 
     // message structures
