@@ -35,7 +35,7 @@ namespace Networks
         Status Send(const void* buffer, const size_t buffer_size) const;
 
         /**
-         * Receives a buffer from the destination connection.
+         * Receives a buffer from the destination connection. Will wait forever for a message.
          * 
          * @param o_buffer      the buffer of data to write into
          * @param buffer_size   the amount of bytes to try and receive
@@ -45,6 +45,16 @@ namespace Networks
          */
         Status Receive(void* o_buffer, const size_t buffer_size, size_t& o_read);
 
+        /**
+         * Receives a buffer from the destination connection, waiting a maximum of timeout_ms miliseconds.
+         * 
+         * @param o_buffer      the buffer of data to write into
+         * @param buffer_size   the amount of bytes to try and receive
+         * @param o_read        the amount of bytes actually written.
+         * @param timeout_ms    the limit amount of miliseconds to wait.
+         * 
+         * @return              an appropriate return status
+         */
         Status ReceiveTimeout(void* o_buffer, const size_t buffer_size, size_t& o_read, size_t timeout_ms);
 
     private:
