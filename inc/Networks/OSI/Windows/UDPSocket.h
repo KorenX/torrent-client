@@ -13,12 +13,37 @@ namespace Networks
 
         UDPSocket() : m_init(false) {}
 
+        /**
+         * Initializes a socket for sending and receiving. The source port is randomized by OS.
+         * 
+         * @param dest_ip       destination ip for the socket connection
+         * @param dest_port     destination port for the socket connection
+         * 
+         * @return              an appropriate return status
+         */
         Status Init(const uint32_t dest_ip, const uint16_t dest_port);
 
+        /**
+         * Sends a buffer to the destination connection.
+         * 
+         * @param buffer        the buffer of data to send
+         * @param buffer_size   the amount of bytes to send from the buffer
+         * 
+         * @return              an appropriate return status
+         */
         Status Send(const void* buffer, const size_t buffer_size);
 
+        /**
+         * Receives a buffer from the destination connection.
+         * 
+         * @param o_buffer      the buffer of data to write into
+         * @param buffer_size   the amount of bytes to try and receive
+         * @param o_read        the amount of bytes actually written.
+         * 
+         * @return              an appropriate return status
+         */
         Status Receive(void* o_buffer, const size_t buffer_size, size_t& o_read);
-        
+
     private:
         bool m_init;
         SOCKET m_socket;
