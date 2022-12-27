@@ -44,7 +44,9 @@ namespace Networks
          * @return              an appropriate return status
          */
         Status Receive(void* o_buffer, const size_t buffer_size, size_t& o_read);
-        
+
+        Status ReceiveTimeout(void* o_buffer, const size_t buffer_size, size_t& o_read, size_t timeout_ms);
+
     private:
         bool m_init;
         int m_socket_fd;
