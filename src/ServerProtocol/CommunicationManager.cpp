@@ -7,6 +7,31 @@
 
 namespace ServerProtocol
 {
+    CommunicationManager::Results CommunicationManager::RegisterClient(uint32_t listening_ip, uint16_t listening_port)
+    {
+        size_t tries_counter = 0;
+        Results res = Results::ReceivingFailed;
+        while (tries_counter < MAX_RETRANSMITS_TRIES && res != Results::Success)
+        {
+            tries_counter++;
+            res = SendRegister(listening_ip, listening_port);
+            if (res != Results::Success)
+            {
+                continue;
+            }
+
+            res = GetRegisterAck();
+        }
+
+        if (tries_counter == MAX_RETRANSMITS_TRIES && res != Results::Success)
+        {
+            return Results::MaxRetransmitsReached;
+        }
+
+        SendThanks();
+        return Results::Success;
+    }
+
     CommunicationManager::Results CommunicationManager::PrintAvailableFiles(bool print_desc)
     {
         Results res = SendFilesList();
@@ -175,6 +200,7 @@ namespace ServerProtocol
         }
         else if (recv_msg.message_header.message_type == MessageTypes::PEERS_FIN)
         {
+            SendThanks();
             return Results::MaxPeersReached;
         }
         else
@@ -221,6 +247,54 @@ namespace ServerProtocol
         {
             PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
             return Results::ReceivingFailed;
+        }
+
+        return Results::Success;
+    }
+
+    void CommunicationManager::SendThanks()
+    {
+        ThanksMessage thanks_message = {};
+        thanks_message.message_type = MessageTypes::THANKS;
+
+        m_server_socket.Send(&thanks_message, sizeof(thanks_message));
+    }
+
+    CommunicationManager::Results CommunicationManager::SendRegister(uint32_t listening_ip, uint16_t listening_port)
+    {
+        RegisterMessage register_message = {};
+        register_message.message_header.message_type = MessageTypes::REGISTER;
+        register_message.client_ip = listening_ip;
+        register_message.client_port = listening_port;
+
+        Networks::Status result = m_server_socket.Send(&register_message, sizeof(register_message));
+        if (result != Networks::Status::Success)
+        {
+            PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(register_message.message_header.message_type), static_cast<uint32_t>(result));
+            return Results::ReceivingFailed;
+        }
+
+        return Results::Success;
+    }
+
+    CommunicationManager::Results CommunicationManager::GetRegisterAck()
+    {
+        MaxServerMessage recv_msg;
+        size_t recv_size = 0;
+        Networks::Status recv_result = m_server_socket.ReceiveTimeout(&recv_msg, sizeof(recv_msg), recv_size, RECEIVE_TIMEOUT_MS);
+        if (recv_result != Networks::Status::Success)
+        {
+            return Results::ReceivingFailed;
+        }
+
+        if (recv_msg.message_header.message_type != MessageTypes::REGISTER_ACK)
+        {
+            return Results::ReceivedBadMessageType;
+        }
+
+        if (recv_size != sizeof(RegisterAckMessage))
+        {
+            return Results::ReceivedBadMessageSize;
         }
 
         return Results::Success;

@@ -21,6 +21,7 @@ namespace ServerProtocol
             BadFilesAmount,
             BadPeersAmount,
             MaxPeersReached,
+            MaxRetransmitsReached,
         };
 
         CommunicationManager(Networks::UDPSocket& server_socket) :  m_server_socket(server_socket), 
@@ -30,6 +31,16 @@ namespace ServerProtocol
                                                                     m_current_peer(0),
                                                                     m_peers_amount(0),
                                                                     m_finished_peers(false) {}
+
+        /**
+         * Register the client port to the server to have this client be a peer for other clients.
+         * 
+         * @param listening_ip      the ip of the application
+         * @param listening_port    the port of the application
+         * 
+         * @return                  an appropriate result
+         */
+        Results RegisterClient(uint32_t listening_ip, uint16_t listening_port);
 
         /**
          * Get all of the available files from the server and prints their info.
@@ -106,6 +117,12 @@ namespace ServerProtocol
          * @return              an appropriate result
          */
         Results SendPeersAck() const;
+
+        void SendThanks();
+
+        Results SendRegister(uint32_t listening_ip, uint16_t listening_port);
+
+        Results GetRegisterAck();
         
         Networks::UDPSocket& m_server_socket;
         uint32_t m_current_fi_index;
@@ -114,6 +131,9 @@ namespace ServerProtocol
         uint32_t m_current_peer;
         uint32_t m_peers_amount;
         bool m_finished_peers;
+
+        static constexpr size_t MAX_RETRANSMITS_TRIES = 5;
+        static constexpr size_t RECEIVE_TIMEOUT_MS = 5000;
     };
 }
 

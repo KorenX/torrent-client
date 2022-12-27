@@ -18,6 +18,14 @@ int main(int argc, char* argv[])
 
     ServerProtocol::CommunicationManager com(sock);
     ServerProtocol::CommunicationManager::Results res;
+
+    res = com.RegisterClient(0x7f000001, 0x4545);
+    if (res != ServerProtocol::CommunicationManager::Results::Success)
+    {
+        PRINT("client register failed\n");
+        return 1;
+    }
+
     res = com.PrintAvailableFiles();
     if (res != ServerProtocol::CommunicationManager::Results::Success)
     {
