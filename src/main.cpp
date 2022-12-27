@@ -17,22 +17,29 @@ int main(int argc, char* argv[])
     }
 
     ServerProtocol::CommunicationManager com(sock);
-    if (!com.PrintAvailableFiles())
+    ServerProtocol::CommunicationManager::Results res;
+    res = com.PrintAvailableFiles();
+    if (res != ServerProtocol::CommunicationManager::Results::Success)
     {
         PRINT("File list failed\n");
         return 1;
     }
+
     PRINT("Enter the file id you wish to download:\n");
     DataStructures::FileInfo wanted_file = {};
     scanf("%u", &wanted_file.file_id);
 
     DataStructures::PeerInfo available_peer = {};
-    if (!com.GetPeerForFile(wanted_file, available_peer))
+    while ((res = com.GetPeerForFile(wanted_file, available_peer)) == ServerProtocol::CommunicationManager::Results::Success)
+    {
+        PRINT("Available peer info: 0x%x:%d\n", available_peer.peer_ip, available_peer.peer_port);
+    }
+
+    if (res != ServerProtocol::CommunicationManager::Results::MaxPeersReached)
     {
         PRINT("Peer list failed\n");
         return 1;
     }
-
-    PRINT("Available peer info: 0x%x:%d\n", available_peer.peer_ip, available_peer.peer_port);
+    
     return 0;
 }

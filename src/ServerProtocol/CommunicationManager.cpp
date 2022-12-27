@@ -3,14 +3,14 @@
 #include <string.h>
 #include <General/Log.h>
 
+#define CHECK_RESULT(res) if (res != Results::Success) return res;
+
 namespace ServerProtocol
 {
-    bool CommunicationManager::PrintAvailableFiles(bool print_desc)
+    CommunicationManager::Results CommunicationManager::PrintAvailableFiles(bool print_desc)
     {
-        if (!SendFilesList())
-        {
-            return false;
-        }
+        Results res = SendFilesList();
+        CHECK_RESULT(res);
 
         MaxServerMessage recv_msg;
         size_t recv_size = 0;
@@ -18,7 +18,7 @@ namespace ServerProtocol
         if (recv_result != Networks::Status::Success)
         {
             PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
-            return false;
+            return Results::ReceivingFailed;
         }
 
         PRINT("FILE ID\t\tFILE NAME");
@@ -28,56 +28,59 @@ namespace ServerProtocol
             if (recv_size < FilesChunkMessage::MINIMAL_SIZE)
             {
                 PRINT("Tried to construct files chunk message with %lu bytes\n", recv_size);
-                return false;
+                return Results::ReceivedBadMessageSize;
             }
 
-            bool success = HandleFilesChunk(reinterpret_cast<FilesChunkMessage&>(recv_msg), print_desc);
-            if (!success)
-            {
-                PRINT("Handle Files Chunk Failed\n");
-                return false;
-            }
+            res = HandleFilesChunk(reinterpret_cast<FilesChunkMessage&>(recv_msg), print_desc);
+            CHECK_RESULT(res);
 
             recv_result = m_server_socket.Receive(&recv_msg, sizeof(recv_msg), recv_size);
             if (recv_result != Networks::Status::Success)
             {
                 PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
-                return false;
+                return Results::ReceivingFailed;
             }
         }
 
         PRINT("-------------------------\n");
 
-        return recv_msg.message_header.message_type == MessageTypes::FILES_FIN;
+        return (recv_msg.message_header.message_type == MessageTypes::FILES_FIN) ? Results::Success : Results::CouldNotGetAllFiles;
     }
 
-    bool CommunicationManager::GetPeerForFile(const DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer)
+    CommunicationManager::Results CommunicationManager::GetPeerForFile(const DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer)
     {
+        if (m_finished_peers)
+        {
+            return Results::MaxPeersReached;
+        }
+
         if (m_current_pi_index == 0)
         {
-            if (!SendPeersList(wanted_file))
-            {
-                return false;
-            }
+            Results res = SendPeersList(wanted_file);
+            CHECK_RESULT(res);
 
-            if (!GetPeersBunch())
-            {
-                return false;
-            }
+            res = GetPeersBunch();
+            CHECK_RESULT(res);
         }
         
-
         memcpy(&o_peer, &m_peers_bunch[m_current_peer++], sizeof(DataStructures::PeerInfo));
 
         if (m_current_peer >= m_peers_amount)
         {
-            return GetPeersBunch();
+            Results res = GetPeersBunch();
+            if (res == Results::MaxPeersReached)
+            {
+                m_finished_peers = true;
+                return Results::Success;
+            }
+
+            return res;
         }
 
-        return true;
+        return Results::Success;
     }
 
-    bool CommunicationManager::SendFilesList() const
+    CommunicationManager::Results CommunicationManager::SendFilesList() const
     {
         FilesListMessage list_message;
         list_message.message_type = MessageTypes::FILES_LIST;
@@ -86,13 +89,13 @@ namespace ServerProtocol
         if (result != Networks::Status::Success)
         {
             PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_type), static_cast<uint32_t>(result));
-            return false;
+            return Results::SendingFailed;
         }
 
-        return true;
+        return Results::Success;
     }
 
-    bool CommunicationManager::HandleFilesChunk(const FilesChunkMessage& files_chunk, bool print_desc)
+    CommunicationManager::Results CommunicationManager::HandleFilesChunk(const FilesChunkMessage& files_chunk, bool print_desc)
     {
         if (m_current_fi_index != files_chunk.starting_index)
         {
@@ -102,7 +105,7 @@ namespace ServerProtocol
         if (files_chunk.files_info_amount > MAX_FILES_INFO_IN_MESSAGE)
         {
             PRINT("got illegal value for files info amount %u\n", files_chunk.files_info_amount);
-            return false;
+            return Results::BadFilesAmount;
         }
 
         for (size_t i = 0; i < files_chunk.files_info_amount; i++)
@@ -116,7 +119,7 @@ namespace ServerProtocol
         return SendFilesAck();
     }
 
-    bool CommunicationManager::SendFilesAck() const
+    CommunicationManager::Results CommunicationManager::SendFilesAck() const
     {
         FilesAckMessage ack_message;
         ack_message.message_header.message_type = MessageTypes::FILES_ACK;
@@ -126,13 +129,13 @@ namespace ServerProtocol
         if (result != Networks::Status::Success)
         {
             PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
-            return false;
+            return Results::SendingFailed;
         }
 
-        return true;
+        return Results::Success;
     }
 
-    bool CommunicationManager::SendPeersList(const DataStructures::FileInfo& wanted_file) const
+    CommunicationManager::Results CommunicationManager::SendPeersList(const DataStructures::FileInfo& wanted_file) const
     {
         PeersListMessage list_message;
         list_message.message_header.message_type = MessageTypes::PEERS_LIST;
@@ -142,13 +145,13 @@ namespace ServerProtocol
         if (result != Networks::Status::Success)
         {
             PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(list_message.message_header.message_type), static_cast<uint32_t>(result));
-            return false;
+            return Results::SendingFailed;
         }
 
-        return true;
+        return Results::Success;
     }
 
-    bool CommunicationManager::GetPeersBunch()
+    CommunicationManager::Results CommunicationManager::GetPeersBunch()
     {
         MaxServerMessage recv_msg;
         size_t recv_size = 0;
@@ -156,7 +159,7 @@ namespace ServerProtocol
         if (recv_result != Networks::Status::Success)
         {
             PRINT("Socket reading failed with error %u\n", static_cast<uint32_t>(recv_result));
-            return false;
+            return Results::ReceivingFailed;
         }
 
         if (recv_msg.message_header.message_type == MessageTypes::PEERS_CHUNK)
@@ -164,37 +167,31 @@ namespace ServerProtocol
             if (recv_size < PeersChunkMessage::MINIMAL_SIZE)
             {
                 PRINT("Tried to construct peers chunk message with %lu bytes\n", recv_size);
-                return false;
+                return Results::ReceivedBadMessageSize;
             }
 
-            bool success = HandlePeersChunk(reinterpret_cast<PeersChunkMessage&>(recv_msg));
-            if (!success)
-            {
-                PRINT("Handle Peers Chunk Failed\n");
-                return false;
-            }
+            Results res = HandlePeersChunk(reinterpret_cast<PeersChunkMessage&>(recv_msg));
+            CHECK_RESULT(res);
         }
         else if (recv_msg.message_header.message_type == MessageTypes::PEERS_FIN)
         {
-            return true;
+            return Results::MaxPeersReached;
         }
         else
         {
             PRINT("Got bad message type: %u\n", static_cast<uint32_t>(recv_msg.message_header.message_type));
-            return false;
+            return Results::ReceivedBadMessageType;
         }
 
-        return true;
+        return Results::Success;
     }
 
-    bool CommunicationManager::HandlePeersChunk(const PeersChunkMessage& peers_chunk)
+    CommunicationManager::Results CommunicationManager::HandlePeersChunk(const PeersChunkMessage& peers_chunk)
     {
         if (m_current_pi_index != peers_chunk.starting_index)
         {
-            if (!SendPeersAck())
-            {
-                return false;
-            }
+            Results res = SendPeersAck();
+            CHECK_RESULT(res);
 
             return GetPeersBunch();
         }
@@ -202,7 +199,7 @@ namespace ServerProtocol
         if (peers_chunk.peers_info_amount > MAX_PEERS_INFO_IN_MESSAGE)
         {
             PRINT("got illegal value for peers info amount %u\n", peers_chunk.peers_info_amount);
-            return false;
+            return Results::BadPeersAmount;
         }
 
         memcpy(m_peers_bunch, peers_chunk.peers_info, peers_chunk.peers_info_amount * sizeof(DataStructures::PeerInfo));
@@ -213,7 +210,7 @@ namespace ServerProtocol
         return SendPeersAck();
     }
 
-    bool CommunicationManager::SendPeersAck() const
+    CommunicationManager::Results CommunicationManager::SendPeersAck() const
     {
         PeersAckMessage ack_message = {};
         ack_message.message_header.message_type = MessageTypes::PEERS_ACK;
@@ -223,9 +220,9 @@ namespace ServerProtocol
         if (result != Networks::Status::Success)
         {
             PRINT("Sending message %u failed with code %u\n", static_cast<uint32_t>(ack_message.message_header.message_type), static_cast<uint32_t>(result));
-            return false;
+            return Results::ReceivingFailed;
         }
 
-        return true;
+        return Results::Success;
     }
 }
