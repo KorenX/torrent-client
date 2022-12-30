@@ -33,7 +33,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool GetPeerForFile(DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer);
+        bool GetPeerForFile(const DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer);
 
     private:
 
@@ -52,7 +52,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool HandleFilesChunk(FilesChunkMessage& files_chunk, bool print_desc = false);
+        bool HandleFilesChunk(const FilesChunkMessage& files_chunk, bool print_desc = false);
 
         /**
          * Sends the FilesAck message to the server
@@ -68,7 +68,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool SendPeersList(DataStructures::FileInfo& wanted_file);
+        bool SendPeersList(const DataStructures::FileInfo& wanted_file);
 
         /**
          * Tries to receive a PeersChunk from the server, and save to memory.
@@ -83,7 +83,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool HandlePeersChunk(PeersChunkMessage& peers_chunk);
+        bool HandlePeersChunk(const PeersChunkMessage& peers_chunk);
         
         /**
          * Sends the PeersAck message to the server

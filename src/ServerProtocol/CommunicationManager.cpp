@@ -51,7 +51,7 @@ namespace ServerProtocol
         return recv_msg.message_header.message_type == MessageTypes::FILES_FIN;
     }
 
-    bool CommunicationManager::GetPeerForFile(DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer)
+    bool CommunicationManager::GetPeerForFile(const DataStructures::FileInfo& wanted_file, DataStructures::PeerInfo& o_peer)
     {
         if (m_current_pi_index == 0)
         {
@@ -92,7 +92,7 @@ namespace ServerProtocol
         return true;
     }
 
-    bool CommunicationManager::HandleFilesChunk(FilesChunkMessage& files_chunk, bool print_desc)
+    bool CommunicationManager::HandleFilesChunk(const FilesChunkMessage& files_chunk, bool print_desc)
     {
         if (m_current_fi_index != files_chunk.starting_index)
         {
@@ -107,7 +107,7 @@ namespace ServerProtocol
 
         for (size_t i = 0; i < files_chunk.files_info_amount; i++)
         {
-            DataStructures::FileInfo& cur_file = files_chunk.files_info[i];
+            const DataStructures::FileInfo& cur_file = files_chunk.files_info[i];
             PRINT("%u\t\t%s\t", cur_file.file_id, cur_file.file_name);
             print_desc ? PRINT("%s\n", cur_file.file_desc) : PRINT("\n");
         }
@@ -132,7 +132,7 @@ namespace ServerProtocol
         return true;
     }
 
-    bool CommunicationManager::SendPeersList(DataStructures::FileInfo& wanted_file)
+    bool CommunicationManager::SendPeersList(const DataStructures::FileInfo& wanted_file)
     {
         PeersListMessage list_message;
         list_message.message_header.message_type = MessageTypes::PEERS_LIST;
@@ -187,7 +187,7 @@ namespace ServerProtocol
         return true;
     }
 
-    bool CommunicationManager::HandlePeersChunk(PeersChunkMessage& peers_chunk)
+    bool CommunicationManager::HandlePeersChunk(const PeersChunkMessage& peers_chunk)
     {
         if (m_current_pi_index != peers_chunk.starting_index)
         {

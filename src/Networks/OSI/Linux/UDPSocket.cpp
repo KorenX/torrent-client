@@ -30,7 +30,7 @@ namespace Networks
             return Networks::Status::InvalidNullptr;
         }
 
-        int written = sendto(m_socket_fd, reinterpret_cast<const char*>(buffer), buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), sizeof(m_dest));
+        ssize_t written = sendto(m_socket_fd, buffer, buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), sizeof(m_dest));
         if (written < 0)
         {
             return Networks::Status::WriteFailed;
@@ -57,7 +57,7 @@ namespace Networks
         }
 
         int dest_len = sizeof(m_dest);
-        int read = recvfrom(m_socket_fd, reinterpret_cast<char*>(o_buffer), buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), reinterpret_cast<socklen_t*>(&dest_len));
+        ssize_t read = recvfrom(m_socket_fd, o_buffer, buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), reinterpret_cast<socklen_t*>(&dest_len));
         if (read < 0)
         {
             return Networks::Status::ReadFailed;
