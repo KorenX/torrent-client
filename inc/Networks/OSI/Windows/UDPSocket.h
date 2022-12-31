@@ -31,7 +31,7 @@ namespace Networks
          * 
          * @return              an appropriate return status
          */
-        Status Send(const void* buffer, const size_t buffer_size);
+        Status Send(const void* buffer, const size_t buffer_size) const;
 
         /**
          * Receives a buffer from the destination connection.

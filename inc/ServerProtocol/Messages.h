@@ -30,7 +30,7 @@ namespace ServerProtocol
         MessageTypes message_type;
     };
 
-    typedef MessageHeader FilesListMessage;
+    using FilesListMessage=MessageHeader;
 
     struct FilesChunkMessage
     {
@@ -47,8 +47,8 @@ namespace ServerProtocol
         uint32_t ack_index;
     };
 
-    typedef AckMessage FilesAckMessage;
-    typedef MessageHeader FilesFinishMessage;
+    using FilesAckMessage = AckMessage;
+    using FilesFinishMessage = MessageHeader;
 
     struct PeersListMessage
     {
@@ -65,10 +65,10 @@ namespace ServerProtocol
         static constexpr size_t MINIMAL_SIZE = sizeof(message_header) + sizeof(peers_info_amount) + sizeof(starting_index) + sizeof(DataStructures::PeerInfo);
     };
 
-    typedef AckMessage PeersAckMessage;
-    typedef MessageHeader PeersFinishMessage;
+    using PeersAckMessage = AckMessage;
+    using PeersFinishMessage = MessageHeader;
 
-    typedef MessageHeader ThanksMessage;
+    using ThanksMessage = MessageHeader;
 
     struct MaxServerMessage
     {

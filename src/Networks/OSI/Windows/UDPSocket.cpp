@@ -24,7 +24,7 @@ Networks::Status Networks::UDPSocket::Init(const uint32_t dest_ip, const uint16_
     return Networks::Status::Success;
 }
 
-Networks::Status Networks::UDPSocket::Send(const void* buffer, const size_t buffer_size)
+Networks::Status Networks::UDPSocket::Send(const void* buffer, const size_t buffer_size) const
 {
     if (!m_init)
     {
@@ -36,7 +36,7 @@ Networks::Status Networks::UDPSocket::Send(const void* buffer, const size_t buff
         return Networks::Status::InvalidNullptr;
     }
 
-    int written = sendto(m_socket, reinterpret_cast<const char*>(buffer), buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), sizeof(m_dest));
+    int written = sendto(m_socket, reinterpret_cast<const char*>(buffer), buffer_size, 0, reinterpret_cast<const sockaddr*>(&m_dest), sizeof(m_dest));
     if (written < 0)
     {
         return Networks::Status::WriteFailed;

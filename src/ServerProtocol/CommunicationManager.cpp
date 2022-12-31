@@ -77,7 +77,7 @@ namespace ServerProtocol
         return true;
     }
 
-    bool CommunicationManager::SendFilesList()
+    bool CommunicationManager::SendFilesList() const
     {
         FilesListMessage list_message;
         list_message.message_type = MessageTypes::FILES_LIST;
@@ -116,7 +116,7 @@ namespace ServerProtocol
         return SendFilesAck();
     }
 
-    bool CommunicationManager::SendFilesAck()
+    bool CommunicationManager::SendFilesAck() const
     {
         FilesAckMessage ack_message;
         ack_message.message_header.message_type = MessageTypes::FILES_ACK;
@@ -132,7 +132,7 @@ namespace ServerProtocol
         return true;
     }
 
-    bool CommunicationManager::SendPeersList(const DataStructures::FileInfo& wanted_file)
+    bool CommunicationManager::SendPeersList(const DataStructures::FileInfo& wanted_file) const
     {
         PeersListMessage list_message;
         list_message.message_header.message_type = MessageTypes::PEERS_LIST;
@@ -213,7 +213,7 @@ namespace ServerProtocol
         return SendPeersAck();
     }
 
-    bool CommunicationManager::SendPeersAck()
+    bool CommunicationManager::SendPeersAck() const
     {
         PeersAckMessage ack_message = {};
         ack_message.message_header.message_type = MessageTypes::PEERS_ACK;

@@ -42,7 +42,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool SendFilesList();
+        bool SendFilesList() const;
 
         /**
          * Handles the FileChunk message from the server
@@ -59,7 +59,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool SendFilesAck();
+        bool SendFilesAck() const;
 
         /**
          * Sends the PeersList message to the server, for the given file
@@ -68,7 +68,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool SendPeersList(const DataStructures::FileInfo& wanted_file);
+        bool SendPeersList(const DataStructures::FileInfo& wanted_file) const;
 
         /**
          * Tries to receive a PeersChunk from the server, and save to memory.
@@ -90,7 +90,7 @@ namespace ServerProtocol
          * 
          * @return              true on success, false otherwise
          */
-        bool SendPeersAck();
+        bool SendPeersAck() const;
         
         Networks::UDPSocket& m_server_socket;
         uint32_t m_current_fi_index;

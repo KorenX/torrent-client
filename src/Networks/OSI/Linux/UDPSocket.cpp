@@ -18,7 +18,7 @@ namespace Networks
         return Status::Success;
     }
 
-    Status UDPSocket::Send(const void* buffer, const size_t buffer_size)
+    Status UDPSocket::Send(const void* buffer, const size_t buffer_size) const
     {
         if (!m_init)
         {
@@ -30,7 +30,7 @@ namespace Networks
             return Networks::Status::InvalidNullptr;
         }
 
-        ssize_t written = sendto(m_socket_fd, buffer, buffer_size, 0, reinterpret_cast<sockaddr*>(&m_dest), sizeof(m_dest));
+        ssize_t written = sendto(m_socket_fd, buffer, buffer_size, 0, reinterpret_cast<const sockaddr*>(&m_dest), sizeof(m_dest));
         if (written < 0)
         {
             return Networks::Status::WriteFailed;
