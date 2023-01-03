@@ -1,0 +1,5 @@
+win32:
+	gcc src/main.cpp src/ServerProtocol/CommunicationManager.cpp src/Networks/OSI/Windows/UDPSocket.cpp src/General/Log.cpp -o client.exe -Iinc -lws2_32
+
+linux:
+	gcc src/main.cpp src/ServerProtocol/CommunicationManager.cpp src/Networks/OSI/Linux/UDPSocket.cpp src/General/Log.cpp -o client.out -Iinc
